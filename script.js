@@ -2,6 +2,8 @@ const taskInput = document.getElementById("taskInput");
 const timeInput = document.getElementById("timeInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const taskList = document.getElementById("taskList");
+const alarmSound = document.getElementById("alarmSound");
+const stopAlarmBtn = document.getElementById("stopAlarmBtn");
 
 let tasks = [];
 
@@ -44,7 +46,7 @@ function addTask() {
     return;
   }
 
-  tasks.push({ text, time, expired: false, alerted: false });
+  tasks.push({ text, time, expired: false, alerted: false, alarmPlayed: false });
   taskInput.value = "";
   timeInput.value = "";
   renderTasks();
@@ -59,18 +61,17 @@ function editTask(index) {
   }
 
   const newText = prompt("Edit task text:", task.text);
-  if (newText === null) return; // cancelled
+  if (newText === null) return;
 
-  const newTime = prompt(
-    "Edit time (YYYY-MM-DDTHH:MM):",
-    task.time.slice(0, 16)
-  );
-  if (newTime === null) return; // cancelled
+  const newTime = prompt("Edit time (YYYY-MM-DDTHH:MM):", task.time.slice(0, 16));
+  if (newTime === null) return;
 
   if (newText.trim() !== "" && newTime.trim() !== "") {
     task.text = newText.trim();
     task.time = newTime;
-    task.alerted = false; // reset pre-expiry alert
+    task.alerted = false;
+    task.expired = false;
+    task.alarmPlayed = false;
     renderTasks();
   } else {
     alert("Task or time cannot be empty!");
@@ -91,20 +92,33 @@ function checkExpiredTasks() {
   tasks.forEach(task => {
     const taskTime = new Date(task.time);
 
-    // Show alert 2 minutes before expiration (120,000 ms)
+    // 2-minute alert
     if (!task.alerted && !task.expired && taskTime - now <= 120000 && taskTime > now) {
       alert(`⏰ Reminder: The task "${task.text}" will expire in less than 2 minutes!`);
       task.alerted = true;
     }
 
-    // Mark as expired if time passed
+    // When time is up
     if (!task.expired && taskTime <= now) {
       task.expired = true;
+      if (!task.alarmPlayed) {
+        alarmSound.play();
+        stopAlarmBtn.style.display = "block"; // show stop button
+        task.alarmPlayed = true;
+        alert(`🚨 The task "${task.text}" has expired!`);
+      }
     }
   });
 
   renderTasks();
 }
+
+// Stop alarm sound manually
+stopAlarmBtn.addEventListener("click", () => {
+  alarmSound.pause();
+  alarmSound.currentTime = 0;
+  stopAlarmBtn.style.display = "none";
+});
 
 addTaskBtn.addEventListener("click", addTask);
 setInterval(checkExpiredTasks, 1000);

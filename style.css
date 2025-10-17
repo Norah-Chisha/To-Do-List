@@ -130,3 +130,21 @@ button.delete:hover {
     width: 100%;
   }
 }
+#stopAlarmBtn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #ff4c75;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+#stopAlarmBtn:hover {
+  background-color: #ff7fa1;
+}
